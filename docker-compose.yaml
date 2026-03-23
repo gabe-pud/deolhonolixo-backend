@@ -1,0 +1,10 @@
+version: '3.9'
+
+services:
+  deolhonolixo-api:
+    build: .
+    container_name: deolhonolixo-api
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
