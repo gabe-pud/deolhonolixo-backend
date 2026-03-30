@@ -78,15 +78,4 @@ public class AuthContoller {
         }
         return ResponseEntity.status(400).body("Credenciais inválidas");
     }
-
-    // ENDPONITS DE TESTE, remover assim que não forem mais nescessários
-    @GetMapping("/teste-user")
-    public ResponseEntity<?> testeUser(){
-        return ResponseEntity.ok().body("usuaio comum e admin podem usar este endpoint");
-    }
-
-    @GetMapping("/teste-admin")
-    public ResponseEntity<?> testeAdmin(){
-        return ResponseEntity.ok().body("apenas admin pode usar este endpoint");
-    }
 }
