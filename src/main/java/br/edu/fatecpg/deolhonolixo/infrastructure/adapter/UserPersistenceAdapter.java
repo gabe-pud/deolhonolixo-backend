@@ -6,6 +6,7 @@ import br.edu.fatecpg.deolhonolixo.core.gateway.UserGateway;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.UserMapper;
 import br.edu.fatecpg.deolhonolixo.infrastructure.persistence.postgres.UserJpaEntity;
 import br.edu.fatecpg.deolhonolixo.infrastructure.persistence.postgres.UserJpaRepository;
+import br.edu.fatecpg.deolhonolixo.infrastructure.security.TokenService;
 import br.edu.fatecpg.deolhonolixo.infrastructure.service.AuthService;
 import br.edu.fatecpg.deolhonolixo.infrastructure.service.EmailService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
+import java.util.HashMap;
 import java.util.Set;
 
 @Component
@@ -23,32 +24,49 @@ public class UserPersistenceAdapter implements UserGateway {
     private final PasswordEncoder passwordEncoder;
     private final AuthService authService;
     private final EmailService emailService;
+    private final TokenService tokenService;
 
-    public UserPersistenceAdapter(UserJpaRepository jpaRepository, UserMapper mapper, PasswordEncoder passwordEncoder, AuthService authService, EmailService emailService) {
+    public UserPersistenceAdapter(UserJpaRepository jpaRepository, UserMapper mapper, PasswordEncoder passwordEncoder, AuthService authService, EmailService emailService, TokenService tokenService) {
         this.jpaRepository = jpaRepository;
         this.mapper = mapper;
         this.passwordEncoder = passwordEncoder;
         this.authService = authService;
         this.emailService = emailService;
+        this.tokenService = tokenService;
     }
 
     @Override
-    public User save(User user) {
+    public HashMap<String, String> save(User user) {
         UserJpaEntity newUser = buildUser(user);
 
         UserJpaEntity savedEntity = jpaRepository.save(newUser);
         emailService.sendVerificationEmail(mapper.toDomainFromJpa(savedEntity));
-        return mapper.toDomainFromJpa(savedEntity);
+
+        HashMap<String,String> response = new HashMap<>();
+        response.put("username",savedEntity.getUsername());
+        response.put("token", "");
+        return response;
     }
 
     @Override
-    public Optional<User> findByEmail(User user) {
-        Optional<UserJpaEntity> jpaEntity = jpaRepository.findByEmail(user.email());
-        if (jpaEntity.isEmpty()) {
-            return Optional.empty();
+    public User findByEmail(User user) {
+        UserJpaEntity jpaEntity = jpaRepository.findByEmail(user.email()).orElseThrow(() -> new RuntimeException("User not found"));
+
+        return mapper.toDomainFromJpa(jpaEntity);
+    }
+
+    @Override
+    public HashMap<String, String> validateLogin(User user, User LoginValidationUser) {
+        UserJpaEntity loginJpaEntity = mapper.toJpaFromDomain(LoginValidationUser);
+
+        if(passwordEncoder.matches(user.password(), loginJpaEntity.getPassword())){
+            String token = this.tokenService.generateToken(loginJpaEntity);
+            HashMap<String,String> response = new HashMap<>();
+            response.put("username",loginJpaEntity.getUsername());
+            response.put("token", token);
+            return response;
         }
-        UserJpaEntity newUser = buildUser(user);
-        return Optional.ofNullable(mapper.toDomainFromJpa(newUser));
+        return null;
     }
 
     public UserJpaEntity buildUser(User user){
@@ -56,7 +74,7 @@ public class UserPersistenceAdapter implements UserGateway {
 
         jpaEntity.setPassword(passwordEncoder.encode(user.password()));
         jpaEntity.setEmail(user.email());
-        jpaEntity.setUsername(user.username());
+        jpaEntity.setUsername(user.username().trim());
 
         String code = authService.generateCode();
         jpaEntity.setVerificationCode(code);

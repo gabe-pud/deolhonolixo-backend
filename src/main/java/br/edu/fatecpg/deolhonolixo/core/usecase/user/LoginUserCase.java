@@ -7,19 +7,16 @@ import br.edu.fatecpg.deolhonolixo.infrastructure.config.annotations.UseCase;
 import java.util.HashMap;
 
 @UseCase
-public class RegisterUserCase {
+public class LoginUserCase {
     private final UserGateway userGateway;
 
-    public RegisterUserCase(UserGateway userGateway) {
+    public LoginUserCase(UserGateway userGateway) {
         this.userGateway = userGateway;
     }
 
     public HashMap<String, String> execute(User user){
-        try {
-            userGateway.findByEmail(user);
-        } catch (RuntimeException e) {
-            return userGateway.save(user);
-        }
-        return null;
+        User loginValidationUser = userGateway.findByEmail(user);
+
+        return userGateway.validateLogin(user, loginValidationUser);
     }
 }
