@@ -5,7 +5,6 @@ import br.edu.fatecpg.deolhonolixo.core.usecase.user.LoginUserCase;
 import br.edu.fatecpg.deolhonolixo.core.usecase.user.RegisterUserCase;
 import br.edu.fatecpg.deolhonolixo.infrastructure.dto.request.UserLoginRequestDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.dto.request.UserRegisterRequestDTO;
-import br.edu.fatecpg.deolhonolixo.infrastructure.dto.response.UserLoginAndRegisterResponseDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.UserMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -26,7 +24,7 @@ import java.util.Optional;
         name = "Autenticação",
         description = "Endpoints responsáveis pela autenticação, registro e verificação de usuários."
 )
-public class AuthContoller {
+public class AuthController {
     private final UserMapper userMapper;
     private final RegisterUserCase registerUserCase;
     private final LoginUserCase loginUserCase;
@@ -43,7 +41,7 @@ public class AuthContoller {
     })
     public ResponseEntity<?> register(@Valid @RequestBody UserRegisterRequestDTO body){
         if (!body.password().equals(body.confirmPassword())){
-            ResponseEntity.status(422).body("A confirmação de senha não confere com a senha digitada");
+            return ResponseEntity.status(422).body("A confirmação de senha não confere com a senha digitada");
         }
         User userDomain = userMapper.toDomainFromRegisterRequestDto(body);
 
@@ -63,7 +61,7 @@ public class AuthContoller {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Login realizado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Credenciais inválidas"),
-            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+            @ApiResponse(responseCode = "400", description = "Usuário não encontrado")
     })
     public ResponseEntity<?> login(@Valid @RequestBody UserLoginRequestDTO body){
         User userDomain = userMapper.toDomainFromLoginRequstDTO(body);
@@ -74,7 +72,7 @@ public class AuthContoller {
                 return ResponseEntity.status(200).body(userMapper.toLoginRegisterResponseDto(response));
             }
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body("Usuário não encontrado");
+            return ResponseEntity.status(400).body("Usuário não encontrado");
         }
         return ResponseEntity.status(400).body("Credenciais inválidas");
     }

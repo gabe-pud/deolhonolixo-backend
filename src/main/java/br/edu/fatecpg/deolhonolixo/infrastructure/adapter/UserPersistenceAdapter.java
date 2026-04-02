@@ -39,11 +39,12 @@ public class UserPersistenceAdapter implements UserGateway {
     public HashMap<String, String> save(User user) {
         UserJpaEntity newUser = buildUser(user);
 
-        UserJpaEntity savedEntity = jpaRepository.save(newUser);
-        emailService.sendVerificationEmail(mapper.toDomainFromJpa(savedEntity));
+        jpaRepository.save(newUser);
+
+        emailService.sendVerificationEmail(mapper.toDomainFromJpa(newUser));
 
         HashMap<String,String> response = new HashMap<>();
-        response.put("username",savedEntity.getUsername());
+        response.put("username",newUser.getUsername());
         response.put("token", "");
         return response;
     }
