@@ -9,10 +9,10 @@ import br.edu.fatecpg.deolhonolixo.infrastructure.config.annotations.UseCase;
 import java.util.HashMap;
 
 @UseCase
-public class LoginUserCase {
+public class LoginCase {
     private final UserGateway userGateway;
 
-    public LoginUserCase(UserGateway userGateway) {
+    public LoginCase(UserGateway userGateway) {
         this.userGateway = userGateway;
     }
 

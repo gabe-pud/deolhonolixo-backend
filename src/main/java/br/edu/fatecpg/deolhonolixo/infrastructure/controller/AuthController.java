@@ -4,10 +4,9 @@ import br.edu.fatecpg.deolhonolixo.core.domain.User;
 import br.edu.fatecpg.deolhonolixo.core.domain.exception.ConfirmPasswordMismatchExeption;
 import br.edu.fatecpg.deolhonolixo.core.domain.exception.LoginValidationException;
 import br.edu.fatecpg.deolhonolixo.core.domain.exception.UserAlreadyRegisteredException;
-import br.edu.fatecpg.deolhonolixo.core.domain.exception.UserNotFoundException;
 import br.edu.fatecpg.deolhonolixo.core.usecase.user.ConfirmPasswordMatchCase;
-import br.edu.fatecpg.deolhonolixo.core.usecase.user.LoginUserCase;
-import br.edu.fatecpg.deolhonolixo.core.usecase.user.RegisterUserCase;
+import br.edu.fatecpg.deolhonolixo.core.usecase.user.LoginCase;
+import br.edu.fatecpg.deolhonolixo.core.usecase.user.RegisterCase;
 import br.edu.fatecpg.deolhonolixo.infrastructure.dto.request.UserLoginRequestDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.dto.request.UserRegisterRequestDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.UserMapper;
@@ -31,8 +30,8 @@ import java.util.HashMap;
 )
 public class AuthController {
     private final UserMapper userMapper;
-    private final RegisterUserCase registerUserCase;
-    private final LoginUserCase loginUserCase;
+    private final RegisterCase registerCase;
+    private final LoginCase loginCase;
     private final ConfirmPasswordMatchCase passwordMatchUserCase;
 
     @PostMapping("/register")
@@ -55,7 +54,7 @@ public class AuthController {
         User userDomain = userMapper.toDomainFromRegisterRequestDto(body);
 
         try {
-            HashMap<String, String> response = registerUserCase.execute(userDomain);
+            HashMap<String, String> response = registerCase.execute(userDomain);
             return ResponseEntity.status(200).body(userMapper.toLoginRegisterResponseDto(response));
         } catch (UserAlreadyRegisteredException e) {
             return ResponseEntity.status(409).body(e.getMessage());
@@ -75,7 +74,7 @@ public class AuthController {
         User userDomain = userMapper.toDomainFromLoginRequstDTO(body);
 
         try {
-            HashMap<String,String> response = loginUserCase.execute(userDomain);
+            HashMap<String,String> response = loginCase.execute(userDomain);
             return ResponseEntity.status(200).body(userMapper.toLoginRegisterResponseDto(response));
         } catch (LoginValidationException e) {
             return ResponseEntity.status(400).body(e.getMessage());
