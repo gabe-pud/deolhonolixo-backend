@@ -1,6 +1,8 @@
 package br.edu.fatecpg.deolhonolixo.core.usecase.user;
 
 import br.edu.fatecpg.deolhonolixo.core.domain.User;
+import br.edu.fatecpg.deolhonolixo.core.domain.exception.UserAlreadyRegisteredException;
+import br.edu.fatecpg.deolhonolixo.core.domain.exception.UserNotFoundException;
 import br.edu.fatecpg.deolhonolixo.core.gateway.UserGateway;
 import br.edu.fatecpg.deolhonolixo.infrastructure.config.annotations.UseCase;
 
@@ -17,9 +19,9 @@ public class RegisterUserCase {
     public HashMap<String, String> execute(User user){
         try {
             userGateway.findByEmail(user);
-        } catch (RuntimeException e) {
+        } catch (UserNotFoundException e) {
             return userGateway.save(user);
         }
-        return null;
+        throw new UserAlreadyRegisteredException();
     }
 }
