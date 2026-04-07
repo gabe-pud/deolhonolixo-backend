@@ -2,6 +2,8 @@ package br.edu.fatecpg.deolhonolixo.infrastructure.adapter;
 
 import br.edu.fatecpg.deolhonolixo.core.domain.Role;
 import br.edu.fatecpg.deolhonolixo.core.domain.User;
+import br.edu.fatecpg.deolhonolixo.core.domain.exception.LoginValidationException;
+import br.edu.fatecpg.deolhonolixo.core.domain.exception.UserNotFoundException;
 import br.edu.fatecpg.deolhonolixo.core.gateway.UserGateway;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.UserMapper;
 import br.edu.fatecpg.deolhonolixo.infrastructure.persistence.postgres.UserJpaEntity;
@@ -56,7 +58,7 @@ public class UserPersistenceAdapter implements UserGateway {
 
     @Override
     public User findByEmail(User user) {
-        UserJpaEntity jpaEntity = jpaRepository.findByEmail(user.email()).orElseThrow(() -> new RuntimeException("User not found"));
+        UserJpaEntity jpaEntity = jpaRepository.findByEmail(user.email()).orElseThrow(UserNotFoundException::new);
 
         return mapper.toDomainFromJpa(jpaEntity);
     }
@@ -71,8 +73,9 @@ public class UserPersistenceAdapter implements UserGateway {
             response.put("username",loginJpaEntity.getUsername());
             response.put("token", token);
             return response;
+        } else {
+            throw new LoginValidationException();
         }
-        return null;
     }
 
     public UserJpaEntity buildUser(User user){
