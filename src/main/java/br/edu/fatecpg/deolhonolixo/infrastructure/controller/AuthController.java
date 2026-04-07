@@ -1,8 +1,12 @@
 package br.edu.fatecpg.deolhonolixo.infrastructure.controller;
 
 import br.edu.fatecpg.deolhonolixo.core.domain.User;
-import br.edu.fatecpg.deolhonolixo.core.usecase.user.LoginUserCase;
-import br.edu.fatecpg.deolhonolixo.core.usecase.user.RegisterUserCase;
+import br.edu.fatecpg.deolhonolixo.core.domain.exception.ConfirmPasswordMismatchExeption;
+import br.edu.fatecpg.deolhonolixo.core.domain.exception.LoginValidationException;
+import br.edu.fatecpg.deolhonolixo.core.domain.exception.UserAlreadyRegisteredException;
+import br.edu.fatecpg.deolhonolixo.core.usecase.user.ConfirmPasswordMatchCase;
+import br.edu.fatecpg.deolhonolixo.core.usecase.user.LoginCase;
+import br.edu.fatecpg.deolhonolixo.core.usecase.user.RegisterCase;
 import br.edu.fatecpg.deolhonolixo.infrastructure.dto.request.UserLoginRequestDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.dto.request.UserRegisterRequestDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.UserMapper;
@@ -26,8 +30,9 @@ import java.util.HashMap;
 )
 public class AuthController {
     private final UserMapper userMapper;
-    private final RegisterUserCase registerUserCase;
-    private final LoginUserCase loginUserCase;
+    private final RegisterCase registerCase;
+    private final LoginCase loginCase;
+    private final ConfirmPasswordMatchCase passwordMatchUserCase;
 
     @PostMapping("/register")
     @Operation(
@@ -36,21 +41,24 @@ public class AuthController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Registro realizado com sucesso, verifique seu e-mail"),
-            @ApiResponse(responseCode = "409", description = "nome de usuário ou email já cadastrado"),
+            @ApiResponse(responseCode = "409", description = "Nome de usuário ou email já cadastrado"),
             @ApiResponse(responseCode = "422", description = "A confirmação de senha não confere com a senha digitada")
     })
     public ResponseEntity<?> register(@Valid @RequestBody UserRegisterRequestDTO body){
-        if (!body.password().equals(body.confirmPassword())){
-            return ResponseEntity.status(422).body("A confirmação de senha não confere com a senha digitada");
+        try {
+            passwordMatchUserCase.execute(body.password(), body.confirmPassword());
+        } catch (ConfirmPasswordMismatchExeption e) {
+            return ResponseEntity.status(422).body(e.getMessage());
         }
+
         User userDomain = userMapper.toDomainFromRegisterRequestDto(body);
 
-        HashMap<String, String> savedEntity = registerUserCase.execute(userDomain);
-
-        if (savedEntity != null){
-            return ResponseEntity.status(200).body(userMapper.toLoginRegisterResponseDto(savedEntity));
+        try {
+            HashMap<String, String> response = registerCase.execute(userDomain);
+            return ResponseEntity.status(200).body(userMapper.toLoginRegisterResponseDto(response));
+        } catch (UserAlreadyRegisteredException e) {
+            return ResponseEntity.status(409).body(e.getMessage());
         }
-        return ResponseEntity.status(409).body("nome de usuário ou email já cadastrado");
     }
 
     @PostMapping("/login")
@@ -60,20 +68,16 @@ public class AuthController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Login realizado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Credenciais inválidas"),
-            @ApiResponse(responseCode = "400", description = "Usuário não encontrado")
+            @ApiResponse(responseCode = "400", description = "Credenciais inválidas")
     })
     public ResponseEntity<?> login(@Valid @RequestBody UserLoginRequestDTO body){
         User userDomain = userMapper.toDomainFromLoginRequstDTO(body);
 
         try {
-            HashMap<String,String> response = loginUserCase.execute(userDomain);
-            if (response != null){
-                return ResponseEntity.status(200).body(userMapper.toLoginRegisterResponseDto(response));
-            }
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body("Usuário não encontrado");
+            HashMap<String,String> response = loginCase.execute(userDomain);
+            return ResponseEntity.status(200).body(userMapper.toLoginRegisterResponseDto(response));
+        } catch (LoginValidationException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
         }
-        return ResponseEntity.status(400).body("Credenciais inválidas");
     }
 }

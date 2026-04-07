@@ -2,6 +2,8 @@ package br.edu.fatecpg.deolhonolixo.infrastructure.adapter;
 
 import br.edu.fatecpg.deolhonolixo.core.domain.Role;
 import br.edu.fatecpg.deolhonolixo.core.domain.User;
+import br.edu.fatecpg.deolhonolixo.core.domain.exception.LoginValidationException;
+import br.edu.fatecpg.deolhonolixo.core.domain.exception.UserNotFoundException;
 import br.edu.fatecpg.deolhonolixo.core.gateway.UserGateway;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.UserMapper;
 import br.edu.fatecpg.deolhonolixo.infrastructure.persistence.postgres.UserJpaEntity;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 @Component
@@ -41,7 +44,11 @@ public class UserPersistenceAdapter implements UserGateway {
 
         jpaRepository.save(newUser);
 
-        emailService.sendVerificationEmail(mapper.toDomainFromJpa(newUser));
+        Map<String, Object> templateVariables = new HashMap<>();
+        templateVariables.put("username", newUser.getUsername());
+        templateVariables.put("verificationCode", newUser.getVerificationCode());
+
+        emailService.sendEmail("confirm-registration.html", templateVariables, mapper.toDomainFromJpa(newUser));
 
         HashMap<String,String> response = new HashMap<>();
         response.put("username",newUser.getUsername());
@@ -51,7 +58,7 @@ public class UserPersistenceAdapter implements UserGateway {
 
     @Override
     public User findByEmail(User user) {
-        UserJpaEntity jpaEntity = jpaRepository.findByEmail(user.email()).orElseThrow(() -> new RuntimeException("User not found"));
+        UserJpaEntity jpaEntity = jpaRepository.findByEmail(user.email()).orElseThrow(UserNotFoundException::new);
 
         return mapper.toDomainFromJpa(jpaEntity);
     }
@@ -66,8 +73,9 @@ public class UserPersistenceAdapter implements UserGateway {
             response.put("username",loginJpaEntity.getUsername());
             response.put("token", token);
             return response;
+        } else {
+            throw new LoginValidationException();
         }
-        return null;
     }
 
     public UserJpaEntity buildUser(User user){
