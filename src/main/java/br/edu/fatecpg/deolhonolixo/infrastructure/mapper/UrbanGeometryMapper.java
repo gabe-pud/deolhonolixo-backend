@@ -6,6 +6,8 @@ import br.edu.fatecpg.deolhonolixo.infrastructure.dto.response.UrbanGeometryResp
 import br.edu.fatecpg.deolhonolixo.infrastructure.persistence.mongodb.UrbanGeometryDocument;
 import org.springframework.stereotype.Component;
 
+
+@Component
 public class UrbanGeometryMapper {
 
     public UrbanGeometry toDomain(UrbanGeometryDocument doc){

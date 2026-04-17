@@ -3,7 +3,7 @@ package br.edu.fatecpg.deolhonolixo.infrastructure.controller;
 
 import br.edu.fatecpg.deolhonolixo.core.usecase.city.GetRouteUseCase;
 
-import br.edu.fatecpg.deolhonolixo.infrastructure.adapter.RouteMapper;
+import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.RouteMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

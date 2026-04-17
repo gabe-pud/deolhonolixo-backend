@@ -2,7 +2,7 @@ package br.edu.fatecpg.deolhonolixo.infrastructure.service;
 
 import br.edu.fatecpg.deolhonolixo.core.domain.city.Route;
 import br.edu.fatecpg.deolhonolixo.core.gateway.city.RouteGateway;
-import br.edu.fatecpg.deolhonolixo.infrastructure.adapter.RouteMapper;
+import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.RouteMapper;
 import br.edu.fatecpg.deolhonolixo.infrastructure.persistence.mongodb.RouteMongoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

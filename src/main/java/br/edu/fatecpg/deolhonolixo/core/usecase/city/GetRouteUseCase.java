@@ -2,8 +2,12 @@ package br.edu.fatecpg.deolhonolixo.core.usecase.city;
 
 import br.edu.fatecpg.deolhonolixo.core.domain.city.Route;
 import br.edu.fatecpg.deolhonolixo.core.gateway.city.RouteGateway;
+import br.edu.fatecpg.deolhonolixo.infrastructure.config.annotations.UseCase;
+
 import java.util.List;
 
+
+@UseCase
 public class GetRouteUseCase {
     private final RouteGateway gateway;
 
