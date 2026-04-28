@@ -2,14 +2,10 @@ package br.edu.fatecpg.deolhonolixo.infrastructure.persistence.mongodb;
 
 
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.data.mongodb.core.geo.GeoJsonPolygon;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
-import java.util.Map;
 
 @Getter
 @Setter
@@ -22,6 +18,6 @@ public class UrbanGeometryDocument {
     private String type;
     private String name;
     private String city;
-    private List<Object> geometry;
-    private Map<String, Object> metadata;
+    private GeoJsonPolygon geometry; // Mapeia o objeto "geometry" automaticamente
+    private UrbanGeometryMetadata metadata;
 }

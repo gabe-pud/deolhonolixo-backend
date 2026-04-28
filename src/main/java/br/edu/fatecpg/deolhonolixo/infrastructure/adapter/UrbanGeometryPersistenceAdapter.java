@@ -7,7 +7,7 @@ import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.UrbanGeometryMapper;
 import br.edu.fatecpg.deolhonolixo.infrastructure.persistence.mongodb.UrbanGeometryMongoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Component
@@ -29,5 +29,10 @@ public class UrbanGeometryPersistenceAdapter implements UrbanGeometryGateway {
         return repository.findById(id)
                 .map(mapper::toDomain)
                 .orElseThrow(() -> new RuntimeException("Geometry não encontrada"));
+    }
+
+    @Override
+    public UrbanGeometry findByName(String name) {
+        return mapper.toDomain(repository.findOneByName(name));
     }
 }

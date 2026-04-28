@@ -9,4 +9,4 @@ public record UserLoginAndRegisterResponseDTO(
 
         @Schema(description = "Token JWT para autenticação nas próximas requisições", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
         String token
-) { }
+) {}

@@ -7,11 +7,9 @@ import java.util.Map;
 
 public record UrbanGeometryResponseDTO (
         String id,
-        String type,
         String name,
         String city,
-        List<Object> geometry,
-        Map<String, Object> metadata
-)
-
-{}
+        List<List<List<Double>>> coordinates,
+        Integer estimatedPopulation,
+        String collectionFrequency
+) {}

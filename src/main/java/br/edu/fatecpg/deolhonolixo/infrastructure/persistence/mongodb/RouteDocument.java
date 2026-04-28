@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
@@ -18,8 +19,11 @@ import java.util.List;
 public class RouteDocument {
     @Id
     private String id;
+    @Field(name = "route_id")
     private String routeId;
+    @Field(name = "route_name")
     private String routeName;
     private List<String> neighborhoods;
+    @Field(name = "route_geometry")
     private Object routeGeometry;
 }

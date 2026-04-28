@@ -6,6 +6,5 @@ import java.util.List;
 public interface UrbanGeometryGateway {
     List<UrbanGeometry> findAll();
     UrbanGeometry findById(String id);
-
-
+    UrbanGeometry findByName(String name);
 }
