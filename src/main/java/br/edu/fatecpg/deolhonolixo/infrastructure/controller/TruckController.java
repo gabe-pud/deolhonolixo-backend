@@ -1,11 +1,14 @@
 package br.edu.fatecpg.deolhonolixo.infrastructure.controller;
 
 import br.edu.fatecpg.deolhonolixo.core.domain.Truck;
+import br.edu.fatecpg.deolhonolixo.core.domain.TruckHistory;
 import br.edu.fatecpg.deolhonolixo.core.domain.exception.TruckAlreadyRegisteredException;
-import br.edu.fatecpg.deolhonolixo.core.usecase.truck.TruckSearchCase;
-import br.edu.fatecpg.deolhonolixo.core.usecase.truck.TruckRegisterCase;
+import br.edu.fatecpg.deolhonolixo.core.domain.exception.TruckGeolocationNotFoundException;
+import br.edu.fatecpg.deolhonolixo.core.domain.exception.TruckNotFoundException;
+import br.edu.fatecpg.deolhonolixo.core.usecase.truck.*;
 import br.edu.fatecpg.deolhonolixo.infrastructure.dto.request.TruckRegisterRequestDTO;
-import br.edu.fatecpg.deolhonolixo.infrastructure.dto.request.TruckSearchRequestDTO;
+import br.edu.fatecpg.deolhonolixo.infrastructure.dto.request.TruckFindRequestDTO;
+import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.TruckHistoryMapper;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.TruckMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,12 +17,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 
 @RestController
 @RequestMapping("/trucks")
@@ -30,8 +31,34 @@ import java.util.HashMap;
 )
 public class TruckController {
     private final TruckMapper truckMapper;
+    private final TruckHistoryMapper truckHistoryMapper;
     private final TruckRegisterCase registerCase;
-    private final TruckSearchCase searchCase;
+    private final TruckFindBylicensePlateCase findBylicensePlateCase;
+    private final TruckFindAllCase truckFindAllCase;
+    private final TruckHistoryFindAllCase findAllCase;
+    private final TruckHistoryFindByIdCase findByIdCase;
+    private final TruckHistoryGetLastGeolocationCase getLastGeolocationCase;
+
+
+    @GetMapping("/")
+    @Operation(
+            summary = "Pesquisa por caminhões registrados",
+            description = "Busca todos os caminhõoes no sistema e retorna suas informações."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Exibindo caminhões encontrados")
+    })
+    public ResponseEntity<?> findTruck(){
+        try {
+            List<Truck> response = truckFindAllCase.execute();
+            return ResponseEntity.status(200).body(
+                    response.stream().map(truckMapper::toFindResponseDTO)
+            );
+        } catch (TruckNotFoundException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
 
     @PostMapping("/register")
     @Operation(
@@ -56,19 +83,69 @@ public class TruckController {
     @PostMapping("/search")
     @Operation(
             summary = "Pesquisa por caminhões registrados",
-            description = "Busca um caminhão no sistema e retorna sua placa e rota designada."
+            description = "Busca um caminhão no sistema e retorna suas informações."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Caminhão encontrado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Caminhão não encontrado"),
     })
-    public ResponseEntity<?> findTruck(@Valid @RequestBody TruckSearchRequestDTO body){
-        Truck truckDomain = truckMapper.toDomainFromSearchRequestDTO(body);
+    public ResponseEntity<?> findTruck(@Valid @RequestBody TruckFindRequestDTO body){
+        Truck truckDomain = truckMapper.toDomainFromFindRequestDTO(body);
 
         try {
-            HashMap<String,String> response = searchCase.execute(truckDomain);
-            return ResponseEntity.status(200).body(truckMapper.toSearcResponseDTO(response));
+            Truck response = findBylicensePlateCase.execute(truckDomain);
+            return ResponseEntity.status(200).body(truckMapper.toFindResponseDTO(response));
         } catch (TruckAlreadyRegisteredException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
+
+    @GetMapping("/history")
+    @Operation(
+            summary = "Mostra o historico de todos os caminões",
+            description = "Busca pelo historico de todos os caminhões e retorna em formato de lista."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "histórico exibido com sucesso"),
+    })
+    public ResponseEntity<?> truckHistory(){
+        List<TruckHistory> response = findAllCase.execute();
+        return ResponseEntity.status(200).body(response.stream().map(truckHistoryMapper::toHistoryFindResponseDTO));
+    }
+
+    @GetMapping("/history/{id}")
+    @Operation(
+            summary = "Mostra o historico do caminhão expecificado",
+            description = "Busca pelo historico do caminhão e retorna em formato de lista."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "histórico exibido com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Caminhão não encontrado"),
+    })
+    public ResponseEntity<?> truckHistoryById(@PathVariable Long id){
+        try {
+            List<TruckHistory> response = findByIdCase.execute(id);
+            return ResponseEntity.status(200).body(response.stream().map(truckHistoryMapper::toHistoryFindResponseDTO));
+        } catch (TruckNotFoundException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/geolocation/{id}")
+    @Operation(
+            summary = "Mostra a geolocalização do caminão expecificado",
+            description = "Busca pelo historico do caminhão e retorna a geolocalização de sua ultima atualização."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "geolocalização exibida com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Caminhão não encontrado"),
+    })
+    public ResponseEntity<?> truckGeolocation(@PathVariable Long id){
+        try {
+            TruckHistory response = getLastGeolocationCase.execute(id);
+            return ResponseEntity.status(200).body(truckHistoryMapper.toHistoryGeolocationResponseDTO(response));
+        } catch (TruckNotFoundException | TruckGeolocationNotFoundException e) {
             return ResponseEntity.status(400).body(e.getMessage());
         }
     }

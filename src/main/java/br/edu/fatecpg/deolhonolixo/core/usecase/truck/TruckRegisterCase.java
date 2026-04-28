@@ -18,7 +18,7 @@ public class TruckRegisterCase {
 
     public HashMap<String,String> execute(Truck truck){
         try {
-            truckGateway.findBylicensePlate(truck);
+            truckGateway.existsBylicensePlate(truck);
         } catch (TruckNotFoundException e){
             return truckGateway.save(truck);
         }

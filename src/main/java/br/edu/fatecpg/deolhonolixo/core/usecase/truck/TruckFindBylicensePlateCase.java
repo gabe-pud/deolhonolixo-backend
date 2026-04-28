@@ -4,17 +4,15 @@ import br.edu.fatecpg.deolhonolixo.core.domain.Truck;
 import br.edu.fatecpg.deolhonolixo.core.gateway.TruckGateway;
 import br.edu.fatecpg.deolhonolixo.infrastructure.config.annotations.UseCase;
 
-import java.util.HashMap;
-
 @UseCase
-public class TruckSearchCase {
+public class TruckFindBylicensePlateCase {
     private final TruckGateway truckGateway;
 
-    public TruckSearchCase(TruckGateway truckGateway) {
+    public TruckFindBylicensePlateCase(TruckGateway truckGateway) {
         this.truckGateway = truckGateway;
     }
 
-    public HashMap<String,String> execute(Truck truck){
-        return truckGateway.search(truck);
+    public Truck execute(Truck truck){
+        return truckGateway.findBylicensePlate(truck);
     }
 }
