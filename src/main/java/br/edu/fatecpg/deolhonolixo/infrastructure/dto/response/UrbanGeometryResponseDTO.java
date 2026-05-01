@@ -15,9 +15,15 @@ public record UrbanGeometryResponseDTO (
         @Schema(description = "Nome da Cidade", example = "Praia Grande")
         String city,
         @Schema(description = "Formato do Bairro ou Rua", example = "[[-46.4231, -24.0210], [-46.4240, -24.0220],...]")
-        List<List<List<Double>>> coordinates,
-        @Schema(description = "Estimativa Populacional do Bairro", example = "2000")
-        Integer estimatedPopulation,
-        @Schema(description = "Frequencia de Coleta", example = "Diaria")
-        String collectionFrequency
+        List<List<List<Double>>> geometry,
+
+        @Schema(description = "Periodo de Coleta", example = "Dia")
+        String collectionPeriod,
+
+        @Schema(description = "Hora da coleta", example = "18:00")
+        String collectionTime,
+
+        @Schema(description = "Dias de Coleta", example = "[Segunda,quarta,sexta]")
+        List<String> collectionDays
+
 ) {}

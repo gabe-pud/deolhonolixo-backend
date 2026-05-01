@@ -6,13 +6,20 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class UrbanGeometryMetadata {
-    @Field(name = "estimated_population")
-    private Integer estimatedPopulation;
-    @Field(name = "collection_frequency")
-    private String collectionFrequency;
+    @Field(name = "collection_period")
+    private String collectionPeriod;
+
+    @Field(name = "collection_time")
+    private String collectionTime;
+
+    @Field(name = "collection_days")
+    private List<String> collectionDays;
+
 }

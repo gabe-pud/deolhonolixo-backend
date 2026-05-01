@@ -18,6 +18,6 @@ public class UrbanGeometryDocument {
     private String type;
     private String name;
     private String city;
-    private GeoJsonPolygon geometry; // Mapeia o objeto "geometry" automaticamente
+    private GeoJsonPolygon geometry;
     private UrbanGeometryMetadata metadata;
 }

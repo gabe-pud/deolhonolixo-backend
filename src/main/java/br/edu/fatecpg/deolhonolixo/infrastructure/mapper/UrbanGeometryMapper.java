@@ -14,13 +14,12 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface UrbanGeometryMapper {
-    @Mapping(source = "metadata.estimatedPopulation", target = "population")
-    @Mapping(source = "metadata.collectionFrequency", target = "frequency")
-    @Mapping(target = "coordinates", expression = "java(mapPolygonToCoords(document.getGeometry()))")
+    @Mapping(source = "metadata.collectionPeriod", target = "collectionPeriod")
+    @Mapping(source = "metadata.collectionTime", target = "collectionTime")
+    @Mapping(source = "metadata.collectionDays", target = "collectionDays")
+    @Mapping(target = "geometry", expression = "java(mapPolygonToCoords(document.getGeometry()))")
     UrbanGeometry toDomain(UrbanGeometryDocument document);
 
-    @Mapping(source = "population", target = "estimatedPopulation")
-    @Mapping(source = "frequency", target = "collectionFrequency")
     UrbanGeometryResponseDTO toResponseDTO(UrbanGeometry domain);
 
     // Helper para converter GeoJsonPolygon para uma lista de coordenadas legível

@@ -7,7 +7,8 @@ public record UrbanGeometry(
         String id,
         String name,
         String city,
-        List<List<Double[]>> coordinates,
-        Integer population,
-        String frequency
+        List<List<Double[]>> geometry,
+        String collectionPeriod,
+        String collectionTime,
+        List<String> collectionDays
 ) {}
