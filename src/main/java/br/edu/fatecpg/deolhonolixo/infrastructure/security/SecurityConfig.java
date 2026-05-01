@@ -33,7 +33,12 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/auth/register").permitAll()
                         .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers("/routes").permitAll()
+                        .requestMatchers("/routes/{id}").permitAll()
+                        .requestMatchers("/urban-geometry/**").permitAll()
                         .requestMatchers("/trucks/**").permitAll()
+
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
