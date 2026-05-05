@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface TruckGateway {
     HashMap<String,String> save(Truck truck);
-    Truck findBylicensePlate(Truck truck);
+    Truck findBylicensePlate(String licensePlate);
     void existsBylicensePlate(Truck truck);
     Truck findById(Long id);
     List<Truck> findAll();

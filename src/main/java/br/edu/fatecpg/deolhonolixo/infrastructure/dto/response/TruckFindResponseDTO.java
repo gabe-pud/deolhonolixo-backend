@@ -14,7 +14,7 @@ public record TruckFindResponseDTO(
         String status,
         Date routeStart,
         Date routeEnd,
-        @Schema(description = "ID da rota para qual este caminão foi designado", example = "PG-LIXO-042")
+        @Schema(description = "ID da rota para qual este caminhão foi designado", example = "PG-LIXO-042")
         @Nullable
         String routeId
 ) { }

@@ -12,7 +12,7 @@ public class TruckFindBylicensePlateCase {
         this.truckGateway = truckGateway;
     }
 
-    public Truck execute(Truck truck){
-        return truckGateway.findBylicensePlate(truck);
+    public Truck execute(String licensePlate){
+        return truckGateway.findBylicensePlate(licensePlate);
     }
 }

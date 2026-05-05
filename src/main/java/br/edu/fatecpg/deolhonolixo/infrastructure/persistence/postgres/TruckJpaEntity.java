@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "trucks")
@@ -22,8 +22,8 @@ public class TruckJpaEntity {
     private String licensePlate;
     private String status;
 
-    private Date routeStart;
-    private Date routeEnd;
+    private LocalDateTime routeStart;
+    private LocalDateTime routeEnd;
     private String routeId;
 
 }

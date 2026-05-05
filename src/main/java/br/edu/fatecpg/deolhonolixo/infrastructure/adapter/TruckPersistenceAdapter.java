@@ -30,8 +30,8 @@ public class TruckPersistenceAdapter implements TruckGateway {
     }
 
     @Override
-    public Truck findBylicensePlate(Truck truck) {
-        TruckJpaEntity truckJpa = jpaRepository.findBylicensePlate(truck.licensePlate()).orElseThrow(TruckNotFoundException::new);
+    public Truck findBylicensePlate(String licensePlate) {
+        TruckJpaEntity truckJpa = jpaRepository.findBylicensePlate(licensePlate).orElseThrow(TruckNotFoundException::new);
         return mapper.toDomainFromJpa(truckJpa);
     }
 
