@@ -36,6 +36,7 @@ public class SecurityConfig {
                         .requestMatchers("/routes").permitAll()
                         .requestMatchers("/routes/{id}").permitAll()
                         .requestMatchers("/urban-geometry/**").permitAll()
+                        .requestMatchers("/trucks/**").permitAll()
 
 
                         .anyRequest().authenticated()
