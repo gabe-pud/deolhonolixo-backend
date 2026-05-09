@@ -5,12 +5,12 @@ import br.edu.fatecpg.deolhonolixo.core.domain.User;
 import br.edu.fatecpg.deolhonolixo.core.domain.exception.LoginValidationException;
 import br.edu.fatecpg.deolhonolixo.core.domain.exception.UserNotFoundException;
 import br.edu.fatecpg.deolhonolixo.core.gateway.UserGateway;
+import br.edu.fatecpg.deolhonolixo.core.usecase.user.EmailRegisterCase;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.UserMapper;
 import br.edu.fatecpg.deolhonolixo.infrastructure.persistence.postgres.UserJpaEntity;
 import br.edu.fatecpg.deolhonolixo.infrastructure.persistence.postgres.UserJpaRepository;
 import br.edu.fatecpg.deolhonolixo.infrastructure.security.TokenService;
 import br.edu.fatecpg.deolhonolixo.infrastructure.service.AuthService;
-import br.edu.fatecpg.deolhonolixo.infrastructure.service.EmailService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -26,15 +26,15 @@ public class UserPersistenceAdapter implements UserGateway {
     private final UserMapper mapper;
     private final PasswordEncoder passwordEncoder;
     private final AuthService authService;
-    private final EmailService emailService;
+    private final EmailRegisterCase emailRegisterCase;
     private final TokenService tokenService;
 
-    public UserPersistenceAdapter(UserJpaRepository jpaRepository, UserMapper mapper, PasswordEncoder passwordEncoder, AuthService authService, EmailService emailService, TokenService tokenService) {
+    public UserPersistenceAdapter(UserJpaRepository jpaRepository, UserMapper mapper, PasswordEncoder passwordEncoder, AuthService authService, EmailRegisterCase emailRegisterCase, TokenService tokenService) {
         this.jpaRepository = jpaRepository;
         this.mapper = mapper;
         this.passwordEncoder = passwordEncoder;
         this.authService = authService;
-        this.emailService = emailService;
+        this.emailRegisterCase = emailRegisterCase;
         this.tokenService = tokenService;
     }
 
@@ -48,7 +48,7 @@ public class UserPersistenceAdapter implements UserGateway {
         templateVariables.put("username", newUser.getUsername());
         templateVariables.put("verificationCode", newUser.getVerificationCode());
 
-        emailService.sendEmail("confirm-registration.html", templateVariables, mapper.toDomainFromJpa(newUser));
+        emailRegisterCase.execute("confirm-registration.html", "De Olho No Lixo - Confirme o seu e-mail", templateVariables, mapper.toDomainFromJpa(newUser));
 
         HashMap<String,String> response = new HashMap<>();
         response.put("username",newUser.getUsername());
