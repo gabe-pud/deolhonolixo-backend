@@ -12,7 +12,7 @@ public class EmailRegisterCase {
         this.emailGateway = emailGateway;
     }
 
-    public void execute(String subject, Map<String, Object> variables, User user) {
-        emailGateway.sendEmail("confirm-email", subject, variables, user);
+    public void execute(String templateName, String subject, Map<String, Object> variables, User user) {
+        emailGateway.sendEmail(templateName, subject, variables, user);
     }
 }
