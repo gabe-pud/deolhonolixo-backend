@@ -8,4 +8,5 @@ public interface TruckHistoryGateway {
     List<TruckHistory> findAll();
     List<TruckHistory> findByLicencePlate(String licensePlate);
     TruckHistory getLastGeolocation(String licensePlate);
+    TruckHistory saveGeolocation(TruckHistory truckHistory);
 }
