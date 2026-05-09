@@ -37,4 +37,13 @@ public class TruckHistoryPersistenceAdapter implements TruckHistoryGateway {
         TruckHistoryDocument doc = repository.findFirstByLicensePlateOrderByTimestampDesc(licensePlate).orElseThrow(TruckGeolocationNotFoundException::new);
         return mapper.toDomainFromDocument(doc);
     }
+
+    @Override
+    public TruckHistory saveGeolocation(TruckHistory truckHistory) {
+        TruckHistoryDocument doc = mapper.toDocumentFromDomain(truckHistory);
+        doc.setId(null);
+        TruckHistoryDocument savedDoc = repository.save(doc);
+
+        return mapper.toDomainFromDocument(savedDoc);
+    }
 }
