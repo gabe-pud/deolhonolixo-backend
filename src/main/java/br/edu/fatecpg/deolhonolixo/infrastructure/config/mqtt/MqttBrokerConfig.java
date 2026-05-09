@@ -17,6 +17,7 @@ import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.integration.mqtt.support.MqttHeaders;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
 
 import java.util.UUID;
 
@@ -73,11 +74,11 @@ public class MqttBrokerConfig {
             String topic = (String) message.getHeaders().getOrDefault("mqtt_receivedTopic", message.getHeaders().get(MqttHeaders.TOPIC));
 
             if (topic != null && payload != null) {
-                String[] splittedTopic = topic.split("/");
+                String[] splitTopic = topic.split("/");
                 String[] coords = payload.split(",");
 
-                if (splittedTopic.length >= 2 && coords.length >= 2) {
-                    String licensePlate = splittedTopic[1];
+                if (splitTopic.length >= 2 && coords.length >= 2) {
+                    String licensePlate = splitTopic[1];
                     Double lat = Double.valueOf(coords[0]);
                     Double lon = Double.valueOf(coords[1]);
 
@@ -85,6 +86,8 @@ public class MqttBrokerConfig {
 
                     log.info("Geolocalização processada para a placa: {}", licensePlate);
                 }
+            } else {
+                throw new MessagingException("Erro ao processar mensagem de geolocalização");
             }
         };
     }
