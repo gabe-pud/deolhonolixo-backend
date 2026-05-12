@@ -13,7 +13,7 @@ public interface TruckHistoryMapper {
     @Mapping(target = "licensePlate", source = "licensePlate")
     @Mapping(target = "timestamp", source = "timestamp")
     @Mapping(target = "telemetry.speedKmh", source = "speedKmh")
-    @Mapping(target = "position", source = "truckHistory")
+    @Mapping(target = "position", expression = "java(mapToGeoJsonPoint(truckHistory))")
     TruckHistoryDocument toDocumentFromDomain(TruckHistory truckHistory);
 
     @Mapping(target = "speedKmh", source = "telemetry.speedKmh")
@@ -31,7 +31,7 @@ public interface TruckHistoryMapper {
     TruckHistoryGeolocationResponseDTO toHistoryGeolocationResponseDTO(TruckHistory truckHistory);
 
     default GeoJsonPoint mapToGeoJsonPoint(TruckHistory truckHistory) {
-        if (truckHistory== null || truckHistory.longitude() == null || truckHistory.latitude() == null) {
+        if (truckHistory == null || truckHistory.longitude() == null || truckHistory.latitude() == null) {
             return null;
         }
         return new GeoJsonPoint(truckHistory.longitude(), truckHistory.latitude());
