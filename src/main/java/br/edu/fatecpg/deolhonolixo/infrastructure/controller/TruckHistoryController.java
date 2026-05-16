@@ -1,11 +1,10 @@
 package br.edu.fatecpg.deolhonolixo.infrastructure.controller;
 
-import br.edu.fatecpg.deolhonolixo.core.domain.TruckHistory;
-import br.edu.fatecpg.deolhonolixo.core.domain.exception.TruckGeolocationNotFoundException;
-import br.edu.fatecpg.deolhonolixo.core.domain.exception.TruckNotFoundException;
 import br.edu.fatecpg.deolhonolixo.core.usecase.truck.TruckHistoryFindAllCase;
 import br.edu.fatecpg.deolhonolixo.core.usecase.truck.TruckHistoryFindByIdCase;
 import br.edu.fatecpg.deolhonolixo.core.usecase.truck.TruckHistoryGetLastGeolocationCase;
+import br.edu.fatecpg.deolhonolixo.infrastructure.dto.response.TruckHistoryFindResponseDTO;
+import br.edu.fatecpg.deolhonolixo.infrastructure.dto.response.TruckHistoryGeolocationResponseDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.TruckHistoryMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,11 +39,15 @@ public class TruckHistoryController {
             description = "Busca pelo histórico de todos os caminhões e retorna em formato de lista."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "histórico exibido com sucesso"),
+            @ApiResponse(responseCode = "200", description = "Histórico exibido com sucesso"),
     })
-    public ResponseEntity<?> truckHistory(){
-        List<TruckHistory> response = findAllCase.execute();
-        return ResponseEntity.status(200).body(response.stream().map(truckHistoryMapper::toHistoryFindResponseDTO));
+    public ResponseEntity<List<TruckHistoryFindResponseDTO>> truckHistory(){
+        List<TruckHistoryFindResponseDTO> response = findAllCase.execute()
+                .stream()
+                .map(truckHistoryMapper::toHistoryFindResponseDTO)
+                .toList();
+
+        return ResponseEntity.status(200).body(response);
     }
 
     @GetMapping("/history/{id}")
@@ -53,16 +56,16 @@ public class TruckHistoryController {
             description = "Busca pelo histórico do caminhão e retorna em formato de lista."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "histórico exibido com sucesso"),
+            @ApiResponse(responseCode = "200", description = "Histórico exibido com sucesso"),
             @ApiResponse(responseCode = "400", description = "Caminhão não encontrado"),
     })
-    public ResponseEntity<?> truckHistoryById(@PathVariable Long id){
-        try {
-            List<TruckHistory> response = findByIdCase.execute(id);
-            return ResponseEntity.status(200).body(response.stream().map(truckHistoryMapper::toHistoryFindResponseDTO));
-        } catch (TruckNotFoundException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
+    public ResponseEntity<List<TruckHistoryFindResponseDTO>> truckHistoryById(@PathVariable Long id){
+        List<TruckHistoryFindResponseDTO> response = findByIdCase.execute(id)
+                .stream()
+                .map(truckHistoryMapper::toHistoryFindResponseDTO)
+                .toList();
+
+        return ResponseEntity.status(200).body(response);
     }
 
     @GetMapping("/geolocation/{id}")
@@ -71,15 +74,12 @@ public class TruckHistoryController {
             description = "Busca pelo historico do caminhão e retorna a geolocalização de sua ultima atualização."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "geolocalização exibida com sucesso"),
+            @ApiResponse(responseCode = "200", description = "Geolocalização exibida com sucesso"),
             @ApiResponse(responseCode = "400", description = "Caminhão não encontrado"),
     })
-    public ResponseEntity<?> truckGeolocation(@PathVariable Long id){
-        try {
-            TruckHistory response = getLastGeolocationCase.execute(id);
-            return ResponseEntity.status(200).body(truckHistoryMapper.toHistoryGeolocationResponseDTO(response));
-        } catch (TruckNotFoundException | TruckGeolocationNotFoundException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
+    public ResponseEntity<TruckHistoryGeolocationResponseDTO> truckGeolocation(@PathVariable Long id){
+        TruckHistoryGeolocationResponseDTO response = truckHistoryMapper.toHistoryGeolocationResponseDTO(getLastGeolocationCase.execute(id));
+
+        return ResponseEntity.status(200).body(response);
     }
 }

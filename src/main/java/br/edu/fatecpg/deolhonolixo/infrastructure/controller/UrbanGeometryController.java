@@ -2,6 +2,7 @@ package br.edu.fatecpg.deolhonolixo.infrastructure.controller;
 
 import br.edu.fatecpg.deolhonolixo.core.usecase.city.UrbanGeometryFindAllCase;
 import br.edu.fatecpg.deolhonolixo.core.usecase.city.UrbanGeometryFindByNameCase;
+import br.edu.fatecpg.deolhonolixo.infrastructure.dto.response.UrbanGeometryResponseDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.UrbanGeometryMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,6 +11,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/urban-geometry")
@@ -31,12 +34,13 @@ public class UrbanGeometryController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     })
-    public ResponseEntity<?> listarTodos() {
-        var result = findAllCase.execute()
+    public ResponseEntity<List<UrbanGeometryResponseDTO>> listarTodos() {
+        List<UrbanGeometryResponseDTO> response = findAllCase.execute()
                 .stream()
                 .map(mapper::toResponseDTO)
                 .toList();
-        return ResponseEntity.ok(result);
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{name}")
@@ -48,7 +52,9 @@ public class UrbanGeometryController {
             @ApiResponse(responseCode = "200", description = "Bairro ou rua encontrado"),
             @ApiResponse(responseCode = "404", description = "Bairro ou rua não encontrado")
     })
-    public ResponseEntity<?> buscarPorNome(@PathVariable String name) {
-        return ResponseEntity.ok(mapper.toResponseDTO(findByNameCase.execute(name)));
+    public ResponseEntity<UrbanGeometryResponseDTO> buscarPorNome(@PathVariable String name) {
+        UrbanGeometryResponseDTO response = mapper.toResponseDTO(findByNameCase.execute(name));
+
+        return ResponseEntity.ok(response);
     }
 }

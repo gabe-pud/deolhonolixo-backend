@@ -1,14 +1,13 @@
 package br.edu.fatecpg.deolhonolixo.infrastructure.controller;
 
 import br.edu.fatecpg.deolhonolixo.core.domain.User;
-import br.edu.fatecpg.deolhonolixo.core.domain.exception.ConfirmPasswordMismatchExeption;
-import br.edu.fatecpg.deolhonolixo.core.domain.exception.LoginValidationException;
-import br.edu.fatecpg.deolhonolixo.core.domain.exception.UserAlreadyRegisteredException;
 import br.edu.fatecpg.deolhonolixo.core.usecase.user.ConfirmPasswordMatchCase;
 import br.edu.fatecpg.deolhonolixo.core.usecase.user.LoginCase;
+import br.edu.fatecpg.deolhonolixo.core.usecase.user.LoginCaseOutputDTO;
 import br.edu.fatecpg.deolhonolixo.core.usecase.user.RegisterCase;
 import br.edu.fatecpg.deolhonolixo.infrastructure.dto.request.UserLoginRequestDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.dto.request.UserRegisterRequestDTO;
+import br.edu.fatecpg.deolhonolixo.infrastructure.dto.response.UserLoginAndRegisterResponseDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.UserMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,8 +17,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
 
 @RestController
 @RequestMapping("/auth")
@@ -40,25 +37,19 @@ public class AuthController {
             description = "Cria um novo usuário no sistema, envia o código de verificação por e-mail e retorna uma mensagem de confirmação."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Registro realizado com sucesso, verifique seu e-mail"),
-            @ApiResponse(responseCode = "409", description = "Nome de usuário ou email já cadastrado"),
+            @ApiResponse(responseCode = "201", description = "Registro realizado com sucesso, verifique seu e-mail"),
+            @ApiResponse(responseCode = "409", description = "Nome de usuário ou e-mail já cadastrado"),
             @ApiResponse(responseCode = "422", description = "A confirmação de senha não confere com a senha digitada")
     })
-    public ResponseEntity<?> register(@Valid @RequestBody UserRegisterRequestDTO body){
-        try {
-            passwordMatchUserCase.execute(body.password(), body.confirmPassword());
-        } catch (ConfirmPasswordMismatchExeption e) {
-            return ResponseEntity.status(422).body(e.getMessage());
-        }
+    public ResponseEntity<UserLoginAndRegisterResponseDTO> register(@Valid @RequestBody UserRegisterRequestDTO body){
+        passwordMatchUserCase.execute(body.password(), body.confirmPassword());
 
-        User userDomain = userMapper.toDomainFromRegisterRequestDto(body);
+        User domainUser = userMapper.toDomainFromRegisterRequestDto(body);
+        User registeredUser = registerCase.execute(domainUser);
 
-        try {
-            HashMap<String, String> response = registerCase.execute(userDomain);
-            return ResponseEntity.status(200).body(userMapper.toLoginRegisterResponseDto(response));
-        } catch (UserAlreadyRegisteredException e) {
-            return ResponseEntity.status(409).body(e.getMessage());
-        }
+        UserLoginAndRegisterResponseDTO response = userMapper.toRegisterResponseDto(registeredUser);
+
+        return ResponseEntity.status(201).body(response);
     }
 
     @PostMapping("/login")
@@ -70,14 +61,10 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Login realizado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Credenciais inválidas")
     })
-    public ResponseEntity<?> login(@Valid @RequestBody UserLoginRequestDTO body){
-        User userDomain = userMapper.toDomainFromLoginRequstDTO(body);
+    public ResponseEntity<UserLoginAndRegisterResponseDTO> login(@Valid @RequestBody UserLoginRequestDTO body){
+            LoginCaseOutputDTO loginCaseOutput = loginCase.execute(body.email(), body.password());
+            UserLoginAndRegisterResponseDTO response = userMapper.toLoginResponseDto(loginCaseOutput);
 
-        try {
-            HashMap<String,String> response = loginCase.execute(userDomain);
-            return ResponseEntity.status(200).body(userMapper.toLoginRegisterResponseDto(response));
-        } catch (LoginValidationException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
+            return ResponseEntity.status(200).body(response);
     }
 }
