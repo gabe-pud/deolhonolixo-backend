@@ -2,22 +2,15 @@ package br.edu.fatecpg.deolhonolixo.infrastructure.adapter;
 
 import br.edu.fatecpg.deolhonolixo.core.domain.Role;
 import br.edu.fatecpg.deolhonolixo.core.domain.User;
-import br.edu.fatecpg.deolhonolixo.core.domain.exception.LoginValidationException;
 import br.edu.fatecpg.deolhonolixo.core.domain.exception.UserNotFoundException;
 import br.edu.fatecpg.deolhonolixo.core.gateway.UserGateway;
-import br.edu.fatecpg.deolhonolixo.core.usecase.user.EmailRegisterCase;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.UserMapper;
 import br.edu.fatecpg.deolhonolixo.infrastructure.persistence.postgres.UserJpaEntity;
 import br.edu.fatecpg.deolhonolixo.infrastructure.persistence.postgres.UserJpaRepository;
 import br.edu.fatecpg.deolhonolixo.infrastructure.security.TokenService;
-import br.edu.fatecpg.deolhonolixo.infrastructure.service.AuthService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 @Component
@@ -25,57 +18,45 @@ public class UserPersistenceAdapter implements UserGateway {
     private final UserJpaRepository jpaRepository;
     private final UserMapper mapper;
     private final PasswordEncoder passwordEncoder;
-    private final AuthService authService;
-    private final EmailRegisterCase emailRegisterCase;
     private final TokenService tokenService;
 
-    public UserPersistenceAdapter(UserJpaRepository jpaRepository, UserMapper mapper, PasswordEncoder passwordEncoder, AuthService authService, EmailRegisterCase emailRegisterCase, TokenService tokenService) {
+    public UserPersistenceAdapter(UserJpaRepository jpaRepository, UserMapper mapper, PasswordEncoder passwordEncoder, TokenService tokenService) {
         this.jpaRepository = jpaRepository;
         this.mapper = mapper;
         this.passwordEncoder = passwordEncoder;
-        this.authService = authService;
-        this.emailRegisterCase = emailRegisterCase;
         this.tokenService = tokenService;
     }
 
     @Override
-    public HashMap<String, String> save(User user) {
+    public User save(User user) {
         UserJpaEntity newUser = buildUser(user);
+        UserJpaEntity savedUser = jpaRepository.save(newUser);
 
-        jpaRepository.save(newUser);
-
-        Map<String, Object> templateVariables = new HashMap<>();
-        templateVariables.put("username", newUser.getUsername());
-        templateVariables.put("verificationCode", newUser.getVerificationCode());
-
-        emailRegisterCase.execute("confirm-registration.html", "De Olho No Lixo - Confirme o seu e-mail", templateVariables, mapper.toDomainFromJpa(newUser));
-
-        HashMap<String,String> response = new HashMap<>();
-        response.put("username",newUser.getUsername());
-        response.put("token", "");
-        return response;
+        return mapper.toDomainFromJpa(savedUser);
     }
 
     @Override
-    public User findByEmail(User user) {
-        UserJpaEntity jpaEntity = jpaRepository.findByEmail(user.email()).orElseThrow(UserNotFoundException::new);
+    public User findByEmail(String email) {
+        UserJpaEntity targetUser = jpaRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
 
-        return mapper.toDomainFromJpa(jpaEntity);
+        return mapper.toDomainFromJpa(targetUser);
     }
 
     @Override
-    public HashMap<String, String> validateLogin(User user, User LoginValidationUser) {
-        UserJpaEntity loginJpaEntity = mapper.toJpaFromDomain(LoginValidationUser);
+    public boolean existsByEmail(String email) {
+        return jpaRepository.existsByEmail(email);
+    }
 
-        if(passwordEncoder.matches(user.password(), loginJpaEntity.getPassword())){
-            String token = this.tokenService.generateToken(loginJpaEntity);
-            HashMap<String,String> response = new HashMap<>();
-            response.put("username",loginJpaEntity.getUsername());
-            response.put("token", token);
-            return response;
-        } else {
-            throw new LoginValidationException();
-        }
+    @Override
+    public String generateToken(User user) {
+        UserJpaEntity loginUser = mapper.toJpaFromDomain(user);
+        return tokenService.generateToken(loginUser);
+    }
+
+    @Override
+    public boolean passwordMatches(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 
     public UserJpaEntity buildUser(User user){
@@ -85,9 +66,6 @@ public class UserPersistenceAdapter implements UserGateway {
         jpaEntity.setEmail(user.email());
         jpaEntity.setUsername(user.username().trim());
 
-        String code = authService.generateCode();
-        jpaEntity.setVerificationCode(code);
-        jpaEntity.setVerificationExpiry(Instant.now().plus(1, ChronoUnit.HOURS));
         jpaEntity.setVerified(false);
 
         if (user.role() != null){
@@ -95,6 +73,7 @@ public class UserPersistenceAdapter implements UserGateway {
         } else {
             jpaEntity.setRoles(Set.of(Role.ROLE_USER));
         }
+
         return jpaEntity;
     }
 }
