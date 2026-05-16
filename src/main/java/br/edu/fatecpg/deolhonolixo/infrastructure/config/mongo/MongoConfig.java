@@ -18,7 +18,7 @@ public class MongoConfig {
 
     @Bean
     public MongoTemplate mongoTemplate() {
-        return new MongoTemplate(MongoClients.create(mongoUri), database);
+        return new MongoTemplate(mongoClient(), database);
     }
 
     @Bean

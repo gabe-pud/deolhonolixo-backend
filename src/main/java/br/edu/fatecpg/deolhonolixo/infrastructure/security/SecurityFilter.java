@@ -19,7 +19,7 @@ import java.util.Optional;
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
 
-    TokenService tokenService;
+    private final TokenService tokenService;
 
     public SecurityFilter(TokenService tokenService) {
         this.tokenService = tokenService;
