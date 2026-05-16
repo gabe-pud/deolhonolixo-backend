@@ -39,12 +39,7 @@ public class UserJpaEntity implements UserDetails {
     @Column(name = "role")
     private Set<Role> roles = new HashSet<>();
 
-    private String verificationCode;
     private Boolean verified = false;
-    private Instant verificationExpiry;
-
-    private String passwordResetCode;
-    private Instant passwordResetExpiry;
 
 
     @Override
