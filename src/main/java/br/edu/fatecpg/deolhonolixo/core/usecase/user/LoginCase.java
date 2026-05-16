@@ -2,11 +2,8 @@ package br.edu.fatecpg.deolhonolixo.core.usecase.user;
 
 import br.edu.fatecpg.deolhonolixo.core.domain.User;
 import br.edu.fatecpg.deolhonolixo.core.domain.exception.LoginValidationException;
-import br.edu.fatecpg.deolhonolixo.core.domain.exception.UserNotFoundException;
 import br.edu.fatecpg.deolhonolixo.core.gateway.UserGateway;
 import br.edu.fatecpg.deolhonolixo.infrastructure.config.annotations.UseCase;
-
-import java.util.HashMap;
 
 @UseCase
 public class LoginCase {
@@ -16,12 +13,15 @@ public class LoginCase {
         this.userGateway = userGateway;
     }
 
-    public HashMap<String, String> execute(User user){
-        try {
-            User loginValidationUser = userGateway.findByEmail(user);
-            return userGateway.validateLogin(user, loginValidationUser);
-        } catch (UserNotFoundException e){
-            throw new LoginValidationException(e);
+    public LoginCaseOutputDTO execute(String email, String rawInputPassword){
+        User user = userGateway.findByEmail(email);
+
+        if(!userGateway.passwordMatches(rawInputPassword, user.password())) {
+            throw new LoginValidationException();
         }
+
+        String token = userGateway.generateToken(user);
+
+        return new LoginCaseOutputDTO(user.username(), token);
     }
 }
