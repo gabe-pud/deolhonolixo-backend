@@ -1,10 +1,10 @@
 package br.edu.fatecpg.deolhonolixo.infrastructure.controller;
 
 import br.edu.fatecpg.deolhonolixo.core.domain.Truck;
-import br.edu.fatecpg.deolhonolixo.core.domain.exception.TruckAlreadyRegisteredException;
-import br.edu.fatecpg.deolhonolixo.core.domain.exception.TruckNotFoundException;
 import br.edu.fatecpg.deolhonolixo.core.usecase.truck.*;
 import br.edu.fatecpg.deolhonolixo.infrastructure.dto.request.TruckRegisterRequestDTO;
+import br.edu.fatecpg.deolhonolixo.infrastructure.dto.response.TruckFindResponseDTO;
+import br.edu.fatecpg.deolhonolixo.infrastructure.dto.response.TruckRegisterResponseDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.TruckMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,15 +40,13 @@ public class TruckController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Exibindo caminhões encontrados")
     })
-    public ResponseEntity<?> truckFindAll(){
-        try {
-            List<Truck> response = truckFindAllCase.execute();
-            return ResponseEntity.status(200).body(
-                    response.stream().map(truckMapper::toFindResponseDTO)
-            );
-        } catch (TruckNotFoundException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
+    public ResponseEntity<List<TruckFindResponseDTO>> truckFindAll(){
+        List<TruckFindResponseDTO> response = truckFindAllCase.execute()
+                .stream()
+                .map(truckMapper::toFindResponseDTO)
+                .toList();
+
+        return ResponseEntity.status(200).body(response);
     }
 
     @GetMapping("/{licensePlate}")
@@ -60,13 +58,11 @@ public class TruckController {
             @ApiResponse(responseCode = "200", description = "Caminhão encontrado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Caminhão não encontrado"),
     })
-    public ResponseEntity<?> truckFindOne(@PathVariable String licensePlate){
-        try {
-            Truck response = findBylicensePlateCase.execute(licensePlate);
-            return ResponseEntity.status(200).body(truckMapper.toFindResponseDTO(response));
-        } catch (TruckAlreadyRegisteredException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
+    public ResponseEntity<TruckFindResponseDTO> truckFindOne(@PathVariable String licensePlate){
+        Truck targetTruck = findBylicensePlateCase.execute(licensePlate);
+        TruckFindResponseDTO response = truckMapper.toFindResponseDTO(targetTruck);
+
+        return ResponseEntity.status(200).body(response);
     }
 
     @PostMapping("/register")
@@ -78,14 +74,10 @@ public class TruckController {
             @ApiResponse(responseCode = "200", description = "Registro realizado com sucesso"),
             @ApiResponse(responseCode = "409", description = "Caminhão já cadastrado"),
     })
-    public ResponseEntity<?> truckRegister(@Valid @RequestBody TruckRegisterRequestDTO body){
+    public ResponseEntity<TruckRegisterResponseDTO> truckRegister(@Valid @RequestBody TruckRegisterRequestDTO body){
         Truck truckDomain = truckMapper.toDomainFromRegisterRequestDTO(body);
+        HashMap<String,String> response = registerCase.execute(truckDomain);
 
-        try {
-            HashMap<String,String> response = registerCase.execute(truckDomain);
-            return ResponseEntity.status(200).body(truckMapper.toRegisterResponseDTO(response));
-        } catch (TruckAlreadyRegisteredException e) {
-            return ResponseEntity.status(409).body(e.getMessage());
-        }
+        return ResponseEntity.status(200).body(truckMapper.toRegisterResponseDTO(response));
     }
 }
