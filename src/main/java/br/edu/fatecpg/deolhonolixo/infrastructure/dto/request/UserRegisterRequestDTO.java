@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 
 import java.util.Set;
 
-@Schema(name = "RegisterRequestDTO", description = "DTO para registro de um novo usuário")
+@Schema(name = "UserRegisterRequestDTO", description = "DTO para registro de um novo usuário")
 public record UserRegisterRequestDTO(
         @Schema(description = "Nome de usuário único", example = "exemplo")
         @NotBlank(message = "O nome de usuário é obrigatório.")
