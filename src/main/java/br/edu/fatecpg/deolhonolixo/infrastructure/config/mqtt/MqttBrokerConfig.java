@@ -15,6 +15,7 @@ import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.integration.mqtt.support.MqttHeaders;
+import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
@@ -24,6 +25,7 @@ import java.util.UUID;
 @EnableIntegration
 @Slf4j
 @Configuration
+@Profile("!test")
 public class MqttBrokerConfig {
     private final TruckHistorySaveCase truckHistorySaveCase;
     @Value("${deolhonolixo.mqtt.url}")
