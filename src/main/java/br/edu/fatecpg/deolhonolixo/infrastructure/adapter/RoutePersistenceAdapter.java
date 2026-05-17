@@ -6,7 +6,6 @@ import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.RouteMapper;
 import br.edu.fatecpg.deolhonolixo.infrastructure.persistence.mongodb.RouteMongoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Component
