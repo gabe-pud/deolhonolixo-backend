@@ -1,0 +1,45 @@
+package br.edu.fatecpg.deolhonolixo.infrastructure.adapter;
+
+import br.edu.fatecpg.deolhonolixo.core.domain.UrbanGeometry;
+import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.UrbanGeometryMapper;
+import br.edu.fatecpg.deolhonolixo.infrastructure.persistence.mongodb.UrbanGeometryDocument;
+import br.edu.fatecpg.deolhonolixo.infrastructure.persistence.mongodb.UrbanGeometryMongoRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class UrbanGeometryPersistenceAdapterTest {
+
+    @Mock
+    UrbanGeometryMongoRepository repository;
+
+    UrbanGeometryMapper mapper = Mappers.getMapper(UrbanGeometryMapper.class);
+
+    @InjectMocks
+    UrbanGeometryPersistenceAdapter adapter;
+
+    @Test
+    void findAll_mapsDocumentsToDomain() {
+        adapter = new UrbanGeometryPersistenceAdapter(repository, mapper);
+
+        UrbanGeometryDocument d = new UrbanGeometryDocument();
+        d.setId("g1");
+        d.setName("Geom 1");
+
+        when(repository.findAll()).thenReturn(List.of(d));
+
+        List<UrbanGeometry> list = adapter.findAll();
+
+        assertEquals(1, list.size());
+        assertEquals("Geom 1", list.get(0).name());
+    }
+}
