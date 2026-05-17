@@ -64,6 +64,36 @@ class TruckHistoryPersistenceAdapterTest {
     }
 
     @Test
+    void findByLicencePlate_returnsEmptyListWhenNone() {
+        adapter = new TruckHistoryPersistenceAdapter(repository, mapper);
+
+        when(repository.findAllByLicensePlate("NONE")).thenReturn(List.of());
+
+        var list = adapter.findByLicencePlate("NONE");
+
+        assertNotNull(list);
+        assertTrue(list.isEmpty());
+    }
+
+    @Test
+    void getLastGeolocation_returnsDomainWhenPresent() {
+        adapter = new TruckHistoryPersistenceAdapter(repository, mapper);
+
+        TruckHistoryDocument d = new TruckHistoryDocument();
+        d.setId("last");
+        d.setLicensePlate("AAA-1111");
+        d.setPosition(new org.springframework.data.mongodb.core.geo.GeoJsonPoint(11.0, 22.0));
+        d.setTimestamp(Instant.now());
+
+        when(repository.findFirstByLicensePlateOrderByTimestampDesc("AAA-1111")).thenReturn(Optional.of(d));
+
+        var last = adapter.getLastGeolocation("AAA-1111");
+
+        assertNotNull(last);
+        assertEquals("AAA-1111", last.licensePlate());
+    }
+
+    @Test
     void getLastGeolocation_throwsWhenEmpty() {
         adapter = new TruckHistoryPersistenceAdapter(repository, mapper);
 

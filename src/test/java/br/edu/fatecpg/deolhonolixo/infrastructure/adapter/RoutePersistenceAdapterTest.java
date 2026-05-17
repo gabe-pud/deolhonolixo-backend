@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -42,5 +43,45 @@ class RoutePersistenceAdapterTest {
 
         assertEquals(1, routes.size());
         assertEquals("R1", routes.get(0).routeId());
+    }
+
+    @Test
+    void findById_returnsDomain() {
+        adapter = new RoutePersistenceAdapter(repository, mapper);
+
+        RouteDocument d = new RouteDocument();
+        d.setId("r2");
+        d.setRouteId("R2");
+
+        when(repository.findById("r2")).thenReturn(Optional.of(d));
+
+        var res = adapter.findById("r2");
+
+        assertEquals("R2", res.routeId());
+    }
+
+    @Test
+    void findById_throwsWhenNotFound() {
+        adapter = new RoutePersistenceAdapter(repository, mapper);
+
+        when(repository.findById("no")).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> adapter.findById("no"));
+    }
+
+    @Test
+    void findByRouteId_mapsDocumentToDomain() {
+        adapter = new RoutePersistenceAdapter(repository, mapper);
+
+        RouteDocument d = new RouteDocument();
+        d.setId("r3");
+        d.setRouteId("R3");
+        d.setRouteName("Name 3");
+
+        when(repository.findOneByRouteId("R3")).thenReturn(d);
+
+        var res = adapter.findByRouteId("R3");
+
+        assertEquals("R3", res.routeId());
     }
 }

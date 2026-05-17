@@ -15,6 +15,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
+import java.util.Set;
+import br.edu.fatecpg.deolhonolixo.core.domain.Role;
+import br.edu.fatecpg.deolhonolixo.core.domain.exception.UserNotFoundException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -85,5 +88,51 @@ class UserPersistenceAdapterTest {
 
         assertTrue(adapter.existsByEmail("x@y.z"));
         verify(repository).existsByEmail("x@y.z");
+    }
+
+    @Test
+    void findByEmail_throwsWhenNotFound() {
+        adapter = new UserPersistenceAdapter(repository, mapper, encoder, tokenService);
+
+        when(repository.findByEmail("no@one.com")).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> adapter.findByEmail("no@one.com"));
+    }
+
+    @Test
+    void generateToken_delegatesToTokenService() {
+        adapter = new UserPersistenceAdapter(repository, mapper, encoder, tokenService);
+
+        User u = new User(null, "carl", "carl@example.com", "x", Set.of(Role.ROLE_USER), false);
+
+        when(tokenService.generateToken(any())).thenReturn("tok-123");
+
+        String token = adapter.generateToken(u);
+
+        assertEquals("tok-123", token);
+        verify(tokenService).generateToken(any());
+    }
+
+    @Test
+    void passwordMatches_checksEncoder() {
+        adapter = new UserPersistenceAdapter(repository, mapper, encoder, tokenService);
+
+        String raw = "plain";
+        String encoded = encoder.encode(raw);
+
+        assertTrue(adapter.passwordMatches(raw, encoded));
+        assertFalse(adapter.passwordMatches("no", encoded));
+    }
+
+    @Test
+    void buildUser_setsDefaultRoleWhenNull() {
+        adapter = new UserPersistenceAdapter(repository, mapper, encoder, tokenService);
+
+        User input = new User(null, "dave", "dave@example.com", "p", null, false);
+
+        var jpa = adapter.buildUser(input);
+
+        assertNotNull(jpa.getRoles());
+        assertTrue(jpa.getRoles().contains(Role.ROLE_USER));
     }
 }

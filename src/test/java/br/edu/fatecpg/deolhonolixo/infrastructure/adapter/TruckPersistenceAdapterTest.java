@@ -13,6 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.List;
+import br.edu.fatecpg.deolhonolixo.core.domain.exception.TruckNotFoundException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -59,5 +61,43 @@ class TruckPersistenceAdapterTest {
         Truck result = adapter.findById(5L);
 
         assertEquals("XYZ-9999", result.licensePlate());
+    }
+
+    @Test
+    void findById_throwsWhenNotFound() {
+        adapter = new TruckPersistenceAdapter(repository, mapper);
+
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(TruckNotFoundException.class, () -> adapter.findById(99L));
+    }
+
+    @Test
+    void findBylicensePlate_mapsEntityToDomain() {
+        adapter = new TruckPersistenceAdapter(repository, mapper);
+
+        TruckJpaEntity entity = new TruckJpaEntity();
+        entity.setId(2L);
+        entity.setLicensePlate("ZZZ-0000");
+
+        when(repository.findBylicensePlate("ZZZ-0000")).thenReturn(Optional.of(entity));
+
+        var res = adapter.findBylicensePlate("ZZZ-0000");
+
+        assertEquals("ZZZ-0000", res.licensePlate());
+    }
+
+    @Test
+    void findAll_mapsAllEntities() {
+        adapter = new TruckPersistenceAdapter(repository, mapper);
+
+        TruckJpaEntity a = new TruckJpaEntity(); a.setId(1L); a.setLicensePlate("A");
+        TruckJpaEntity b = new TruckJpaEntity(); b.setId(2L); b.setLicensePlate("B");
+
+        when(repository.findAll()).thenReturn(List.of(a,b));
+
+        var list = adapter.findAll();
+
+        assertEquals(2, list.size());
     }
 }
