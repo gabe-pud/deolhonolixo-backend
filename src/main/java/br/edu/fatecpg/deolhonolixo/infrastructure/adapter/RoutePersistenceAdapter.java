@@ -3,6 +3,7 @@ package br.edu.fatecpg.deolhonolixo.infrastructure.adapter;
 import br.edu.fatecpg.deolhonolixo.core.domain.Route;
 import br.edu.fatecpg.deolhonolixo.core.gateway.RouteGateway;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.RouteMapper;
+import br.edu.fatecpg.deolhonolixo.infrastructure.persistence.mongodb.RouteDocument;
 import br.edu.fatecpg.deolhonolixo.infrastructure.persistence.mongodb.RouteMongoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -33,5 +34,11 @@ public class RoutePersistenceAdapter implements RouteGateway {
     @Override
     public Route findByRouteId(String id) {
         return mapper.toDomain(repository.findOneByRouteId(id));
+    }
+
+    @Override
+    public Route save(Route route) {
+        RouteDocument savedDocument = repository.save(mapper.toDocument(route));
+        return mapper.toDomain(savedDocument);
     }
 }

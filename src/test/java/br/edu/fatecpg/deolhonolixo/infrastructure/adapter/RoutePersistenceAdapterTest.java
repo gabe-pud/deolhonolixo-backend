@@ -84,4 +84,20 @@ class RoutePersistenceAdapterTest {
 
         assertEquals("R3", res.routeId());
     }
+
+    @Test
+    void save_persistsDocumentAndReturnsSavedRoute() {
+        adapter = new RoutePersistenceAdapter(repository, mapper);
+
+        Route route = new Route(null, "R4", "Route 4", List.of("Centro"), List.of(List.of(-46.4, -24.0)));
+        RouteDocument saved = new RouteDocument("1", "R4", "Route 4", List.of("Centro"), route.routeGeometry());
+
+        when(repository.save(any(RouteDocument.class))).thenReturn(saved);
+
+        Route result = adapter.save(route);
+
+        assertEquals("1", result.id());
+        assertEquals("R4", result.routeId());
+        verify(repository).save(any(RouteDocument.class));
+    }
 }
