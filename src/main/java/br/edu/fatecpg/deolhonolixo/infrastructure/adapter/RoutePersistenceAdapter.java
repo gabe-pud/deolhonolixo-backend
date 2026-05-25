@@ -28,12 +28,18 @@ public class RoutePersistenceAdapter implements RouteGateway {
     public Route findById(String id) {
         return repository.findById(String.valueOf(id))
                 .map(mapper::toDomain)
-                .orElseThrow(() -> new RuntimeException("Rota não encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Rota não encontrada"));
     }
 
     @Override
     public Route findByRouteId(String id) {
-        return mapper.toDomain(repository.findOneByRouteId(id));
+        RouteDocument routeDocument = repository.findOneByRouteId(id);
+
+        if (routeDocument == null) {
+            throw new IllegalArgumentException("Rota não encontrada");
+        }
+
+        return mapper.toDomain(routeDocument);
     }
 
     @Override

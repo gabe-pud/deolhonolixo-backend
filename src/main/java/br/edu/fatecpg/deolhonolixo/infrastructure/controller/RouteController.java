@@ -5,6 +5,7 @@ import br.edu.fatecpg.deolhonolixo.core.usecase.city.RouteFindAllCase;
 
 import br.edu.fatecpg.deolhonolixo.core.usecase.city.RouteFindByRouteIdCase;
 import br.edu.fatecpg.deolhonolixo.core.usecase.city.RouteSaveCase;
+import br.edu.fatecpg.deolhonolixo.core.usecase.city.RouteUpdateCase;
 import br.edu.fatecpg.deolhonolixo.infrastructure.dto.request.RouteSaveRequestDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.dto.response.RouteResponseDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.RouteMapper;
@@ -25,6 +26,7 @@ public class RouteController {
     private final RouteFindAllCase findAllCase;
     private final RouteFindByRouteIdCase findByRouteIdCase;
     private final RouteSaveCase saveCase;
+    private final RouteUpdateCase updateCase;
     private final RouteMapper mapper;
 
     @GetMapping
@@ -54,5 +56,20 @@ public class RouteController {
         RouteResponseDTO response = mapper.toResponseDTO(savedRoute);
 
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{routeId}")
+    @Operation(summary = "Atualiza uma rota")
+    public ResponseEntity<RouteResponseDTO> atualizar(
+            @PathVariable String routeId,
+            @Valid @RequestBody RouteSaveRequestDTO request
+    ) {
+        if (!routeId.equals(request.routeId())) {
+            throw new IllegalArgumentException("O routeId da URL deve ser igual ao routeId do corpo.");
+        }
+
+        Route updatedRoute = updateCase.execute(mapper.toDomainFormRequestDTO(request));
+
+        return ResponseEntity.ok(mapper.toResponseDTO(updatedRoute));
     }
 }

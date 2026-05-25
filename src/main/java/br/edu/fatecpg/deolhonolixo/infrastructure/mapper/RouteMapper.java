@@ -12,5 +12,5 @@ public interface RouteMapper {
     Route toDomain (RouteDocument doc);
     RouteDocument toDocument(Route route);
     Route toDomainFormRequestDTO(RouteSaveRequestDTO route);
-    RouteResponseDTO toResponseDTO(Route r);
+    RouteResponseDTO toResponseDTO(Route route);
 }

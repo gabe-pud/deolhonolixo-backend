@@ -57,4 +57,12 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(status).body(error);
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponseDTO> handleIllegalArgument(IllegalArgumentException e) {
+        int status = 400;
+        ErrorResponseDTO error = new ErrorResponseDTO(Instant.now(), status, e.getMessage());
+
+        return ResponseEntity.status(status).body(error);
+    }
 }
