@@ -11,7 +11,6 @@ import br.edu.fatecpg.deolhonolixo.infrastructure.dto.request.UserRegisterReques
 import br.edu.fatecpg.deolhonolixo.infrastructure.dto.response.UserLoginAndRegisterResponseDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.UserMapper;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;

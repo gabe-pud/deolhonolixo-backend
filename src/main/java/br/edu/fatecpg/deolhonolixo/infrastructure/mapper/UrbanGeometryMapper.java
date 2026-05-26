@@ -6,7 +6,6 @@ import br.edu.fatecpg.deolhonolixo.infrastructure.persistence.mongodb.UrbanGeome
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.data.mongodb.core.geo.GeoJsonPolygon;
-import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;

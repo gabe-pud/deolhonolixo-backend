@@ -3,7 +3,6 @@ package br.edu.fatecpg.deolhonolixo.infrastructure.dto.response;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
-import java.util.Map;
 
 
 @Schema(name = "UrbanGeometryResponseDTO", description = "DTO de resposta de pesquisas por Geometria Urbana.")
