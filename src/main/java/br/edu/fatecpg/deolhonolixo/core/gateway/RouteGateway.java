@@ -7,4 +7,5 @@ public interface RouteGateway {
     List<Route> findAll();
     Route findById(String id);
     Route findByRouteId(String id);
+    Route save(Route route);
 }

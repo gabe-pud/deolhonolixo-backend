@@ -1,12 +1,17 @@
 package br.edu.fatecpg.deolhonolixo.infrastructure.controller;
 
+import br.edu.fatecpg.deolhonolixo.core.domain.Route;
 import br.edu.fatecpg.deolhonolixo.core.usecase.city.RouteFindAllCase;
 
 import br.edu.fatecpg.deolhonolixo.core.usecase.city.RouteFindByRouteIdCase;
+import br.edu.fatecpg.deolhonolixo.core.usecase.city.RouteSaveCase;
+import br.edu.fatecpg.deolhonolixo.core.usecase.city.RouteUpdateCase;
+import br.edu.fatecpg.deolhonolixo.infrastructure.dto.request.RouteSaveRequestDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.dto.response.RouteResponseDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.RouteMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +25,8 @@ import java.util.List;
 public class RouteController {
     private final RouteFindAllCase findAllCase;
     private final RouteFindByRouteIdCase findByRouteIdCase;
+    private final RouteSaveCase saveCase;
+    private final RouteUpdateCase updateCase;
     private final RouteMapper mapper;
 
     @GetMapping
@@ -39,5 +46,30 @@ public class RouteController {
         RouteResponseDTO response = mapper.toResponseDTO(findByRouteIdCase.execute(id));
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping(consumes = "application/json")
+    @Operation(summary = "Cria uma rota")
+    public ResponseEntity<RouteResponseDTO> salvar(@Valid @RequestBody RouteSaveRequestDTO request) {
+        Route savedRoute = saveCase.execute(mapper.toDomainFormRequestDTO(request));
+
+        RouteResponseDTO response = mapper.toResponseDTO(savedRoute);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{routeId}")
+    @Operation(summary = "Atualiza uma rota")
+    public ResponseEntity<RouteResponseDTO> atualizar(
+            @PathVariable String routeId,
+            @Valid @RequestBody RouteSaveRequestDTO request
+    ) {
+        if (!routeId.equals(request.routeId())) {
+            throw new IllegalArgumentException("O routeId da URL deve ser igual ao routeId do corpo.");
+        }
+
+        Route updatedRoute = updateCase.execute(mapper.toDomainFormRequestDTO(request));
+
+        return ResponseEntity.ok(mapper.toResponseDTO(updatedRoute));
     }
 }
