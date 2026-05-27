@@ -3,6 +3,7 @@ package br.edu.fatecpg.deolhonolixo.infrastructure.controller;
 import br.edu.fatecpg.deolhonolixo.core.domain.Truck;
 import br.edu.fatecpg.deolhonolixo.core.usecase.truck.*;
 import br.edu.fatecpg.deolhonolixo.infrastructure.dto.request.TruckRegisterRequestDTO;
+import br.edu.fatecpg.deolhonolixo.infrastructure.dto.request.TruckUpdateRequestDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.dto.response.TruckFindResponseDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.dto.response.TruckRegisterResponseDTO;
 import br.edu.fatecpg.deolhonolixo.infrastructure.mapper.TruckMapper;
@@ -30,6 +31,7 @@ public class TruckController {
     private final TruckRegisterCase registerCase;
     private final TruckFindBylicensePlateCase findBylicensePlateCase;
     private final TruckFindAllCase truckFindAllCase;
+        private final TruckUpdateCase truckUpdateCase;
 
 
     @GetMapping("")
@@ -80,4 +82,23 @@ public class TruckController {
 
         return ResponseEntity.status(200).body(truckMapper.toRegisterResponseDTO(response));
     }
+
+        @PutMapping("/{licensePlate}")
+        @Operation(
+                        summary = "Atualiza um caminhão",
+                        description = "Atualiza status, início e fim de rota e a rota associada de um caminhão existente."
+        )
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Caminhão atualizado com sucesso"),
+                        @ApiResponse(responseCode = "400", description = "Caminhão não encontrado")
+        })
+        public ResponseEntity<TruckFindResponseDTO> truckUpdate(
+                        @PathVariable String licensePlate,
+                        @Valid @RequestBody TruckUpdateRequestDTO body
+        ) {
+                Truck truckDomain = truckMapper.toDomainFromUpdateRequestDTO(body);
+                Truck updatedTruck = truckUpdateCase.execute(licensePlate, truckDomain);
+
+                return ResponseEntity.ok(truckMapper.toFindResponseDTO(updatedTruck));
+        }
 }
