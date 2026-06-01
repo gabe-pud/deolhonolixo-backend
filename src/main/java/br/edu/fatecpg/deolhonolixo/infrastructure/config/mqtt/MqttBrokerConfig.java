@@ -20,6 +20,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
+import javax.net.ssl.SSLSocketFactory;
 import java.util.UUID;
 
 @EnableIntegration
@@ -34,6 +35,12 @@ public class MqttBrokerConfig {
     private String[] mqttTopic;
     @Value("${deolhonolixo.mqtt.qos}")
     private int mqttQos;
+    @Value("${deolhonolixo.mqtt.username:}")
+    private String mqttUsername;
+    @Value("${deolhonolixo.mqtt.password:}")
+    private String mqttPassword;
+    @Value("${deolhonolixo.mqtt.ssl-enabled:false}")
+    private boolean mqttSslEnabled;
 
     public MqttBrokerConfig(TruckHistorySaveCase truckHistorySaveCase) {
         this.truckHistorySaveCase = truckHistorySaveCase;
@@ -48,6 +55,18 @@ public class MqttBrokerConfig {
         options.setAutomaticReconnect(true);
         options.setCleanSession(true);
         options.setConnectionTimeout(10);
+
+        if (mqttUsername != null && !mqttUsername.isBlank()) {
+            options.setUserName(mqttUsername);
+        }
+
+        if (mqttPassword != null && !mqttPassword.isBlank()) {
+            options.setPassword(mqttPassword.toCharArray());
+        }
+
+        if (mqttSslEnabled || mqttUrl.startsWith("ssl://") || mqttUrl.startsWith("wss://")) {
+            options.setSocketFactory(SSLSocketFactory.getDefault());
+        }
 
         factory.setConnectionOptions(options);
         return factory;
